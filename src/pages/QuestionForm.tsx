@@ -364,6 +364,13 @@ const QuestionForm: React.FC = () => {
           </Button>
         </div>
       </form>
+
+      {/* Button to navigate to new question form */}
+      <div className="mt-8">
+        <Button onClick={() => navigate("/questions/new")} icon={Plus}>
+          + Nova Questão
+        </Button>
+      </div>
     </div>
   );
 };

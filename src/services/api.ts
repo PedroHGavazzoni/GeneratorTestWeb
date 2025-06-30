@@ -1,12 +1,19 @@
 import { Question, Exam } from "../types";
 
-// Apenas acesso local
-const API_URL = "http://localhost:5000/api";
+// Troque pelo IP real da sua máquina na rede local
+const API_URL = "http://192.168.1.8:5000/api";
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : undefined;
+}
 
 export const api = {
   // Buscar prova por ID
   async getExam(id: number): Promise<Exam> {
-    const res = await fetch(`${API_URL}/provas/${id}`);
+    const res = await fetch(`${API_URL}/provas/${id}`, {
+      headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error("Prova não encontrada");
     return res.json();
   },
@@ -19,14 +26,18 @@ export const api = {
     const params = new URLSearchParams();
     if (disciplina) params.append("disciplina", disciplina);
     if (assunto) params.append("assunto", assunto);
-    const res = await fetch(`${API_URL}/questoes?${params.toString()}`);
+    const res = await fetch(`${API_URL}/questoes?${params.toString()}`, {
+      headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error("Erro ao buscar questões");
     return res.json();
   },
 
   // Buscar questão por ID
   async getQuestion(id: number): Promise<Question> {
-    const res = await fetch(`${API_URL}/questoes/${id}`);
+    const res = await fetch(`${API_URL}/questoes/${id}`, {
+      headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error("Questão não encontrada");
     return res.json();
   },
@@ -40,7 +51,10 @@ export const api = {
   }): Promise<Question> {
     const res = await fetch(`${API_URL}/questoes`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(getAuthHeaders() || {}),
+      },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Erro ao criar questão");
@@ -59,7 +73,10 @@ export const api = {
   ): Promise<Question> {
     const res = await fetch(`${API_URL}/questoes/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(getAuthHeaders() || {}),
+      },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Erro ao atualizar questão");
@@ -70,6 +87,7 @@ export const api = {
   async deleteQuestion(id: number): Promise<void> {
     const res = await fetch(`${API_URL}/questoes/${id}`, {
       method: "DELETE",
+      headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error("Erro ao excluir questão");
   },
@@ -82,7 +100,10 @@ export const api = {
   }): Promise<Exam> {
     const res = await fetch(`${API_URL}/provas`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(getAuthHeaders() || {}),
+      },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Erro ao criar prova");
@@ -96,7 +117,10 @@ export const api = {
   ): Promise<Exam> {
     const res = await fetch(`${API_URL}/provas/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(getAuthHeaders() || {}),
+      },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Erro ao atualizar prova");
@@ -107,13 +131,16 @@ export const api = {
   async deleteExam(id: number): Promise<void> {
     const res = await fetch(`${API_URL}/provas/${id}`, {
       method: "DELETE",
+      headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error("Erro ao excluir prova");
   },
 
   // Listar provas
   async getExams(): Promise<Exam[]> {
-    const res = await fetch(`${API_URL}/provas`);
+    const res = await fetch(`${API_URL}/provas`, {
+      headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error("Erro ao buscar provas");
     return res.json();
   },

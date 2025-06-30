@@ -8,7 +8,7 @@ const Login: React.FC = () => {
   const { user, login, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
-    password: "",
+    senha: "",
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Login: React.FC = () => {
     setError("");
 
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email, formData.senha);
       navigate("/");
     } catch {
       setError("E-mail ou senha inválidos");
@@ -96,10 +96,10 @@ const Login: React.FC = () => {
                 </div>
                 <input
                   id="password"
-                  name="password"
+                  name="senha"
                   type="password"
                   required
-                  value={formData.password}
+                  value={formData.senha}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Digite sua senha"

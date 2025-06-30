@@ -18,7 +18,7 @@ const config = {
 sql
   .connect(config)
   .then(() =>
-    app.listen(5000, "localhost", () =>
+    app.listen(5000, "0.0.0.0", () =>
       console.log("API rodando em http://localhost:5000")
     )
   )
@@ -40,22 +40,18 @@ function authMiddleware(req, res, next) {
 // Rota de login (exemplo)
 app.post("/api/login", async (req, res) => {
   const { email, senha } = req.body;
-  try {
-    const result = await sql.query`
-      SELECT Id, Nome, Email FROM Usuarios WHERE Email = ${email} AND Senha = ${senha}
-    `;
-    const user = result.recordset[0];
-    if (!user) return res.status(401).json({ error: "Credenciais inválidas" });
+  const result = await sql.query`
+    SELECT Id, Nome, Email FROM Usuarios WHERE Email = ${email} AND Senha = ${senha}
+  `;
+  const user = result.recordset[0];
+  if (!user) return res.status(401).json({ error: "Credenciais inválidas" });
 
-    const token = jwt.sign(
-      { id: user.Id, name: user.Nome, email: user.Email },
-      SECRET,
-      { expiresIn: "8h" }
-    );
-    res.json({ user, token });
-  } catch (err) {
-    res.status(500).json({ error: "Erro ao autenticar" });
-  }
+  const token = jwt.sign(
+    { id: user.Id, name: user.Nome, email: user.Email },
+    SECRET,
+    { expiresIn: "8h" }
+  );
+  res.json({ user, token });
 });
 
 // Buscar questão por ID (com alternativas)
@@ -322,12 +318,9 @@ app.get("/api/dashboard", async (req, res) => {
     const totalQuestoes =
       await sql.query`SELECT COUNT(*) AS total FROM Questoes`;
     const totalProvas = await sql.query`SELECT COUNT(*) AS total FROM Provas`;
-    // Adicione outras métricas conforme necessário
-
     res.json({
       totalQuestoes: totalQuestoes.recordset[0].total,
       totalProvas: totalProvas.recordset[0].total,
-      // Outras métricas
     });
   } catch (err) {
     res.status(500).json({ error: "Erro ao buscar dados do dashboard" });

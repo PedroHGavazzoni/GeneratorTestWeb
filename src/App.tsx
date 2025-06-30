@@ -30,6 +30,7 @@ function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="questions" element={<Questions />} />
+            <Route path="questions/new" element={<QuestionForm />} />
             <Route path="questions/:id" element={<QuestionForm />} />
             <Route path="exams" element={<Exams />} />
             <Route path="exams/new" element={<ExamForm />} />

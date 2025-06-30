@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FileText, ClipboardList, Plus, TrendingUp, BarChart3 } from 'lucide-react';
-import { api } from '../services/api';
-import { Question, Exam } from '../types';
-import Button from '../components/Button';
-import LoadingSpinner from '../components/LoadingSpinner';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  FileText,
+  ClipboardList,
+  Plus,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
+import { api } from "../services/api";
+import Button from "../components/Button";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState({
     totalQuestions: 0,
     totalExams: 0,
     questionsByDiscipline: {} as Record<string, number>,
-    examsByDiscipline: {} as Record<string, number>
+    examsByDiscipline: {} as Record<string, number>,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadDashboardData();
@@ -25,7 +30,7 @@ const Dashboard: React.FC = () => {
       setLoading(true);
       const [questions, exams] = await Promise.all([
         api.getQuestions(),
-        api.getExams()
+        api.getExams(),
       ]);
 
       // Calculate statistics
@@ -43,11 +48,11 @@ const Dashboard: React.FC = () => {
         totalQuestions: questions.length,
         totalExams: exams.length,
         questionsByDiscipline,
-        examsByDiscipline
+        examsByDiscipline,
       });
     } catch (err) {
-      setError('Erro ao carregar dados do dashboard');
-      console.error('Dashboard error:', err);
+      setError("Erro ao carregar dados do dashboard");
+      console.error("Dashboard error:", err);
     } finally {
       setLoading(false);
     }
@@ -70,7 +75,7 @@ const Dashboard: React.FC = () => {
   }
 
   const topDisciplines = Object.entries(stats.questionsByDiscipline)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
 
   return (
@@ -95,7 +100,10 @@ const Dashboard: React.FC = () => {
                 Visualize e gerencie questões cadastradas
               </p>
               <Link to="/questions">
-                <Button variant="outline" className="bg-white text-blue-600 border-white hover:bg-blue-50">
+                <Button
+                  variant="outline"
+                  className="bg-white text-blue-600 border-white hover:bg-blue-50"
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   Acessar
                 </Button>
@@ -109,11 +117,12 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-semibold mb-2">Área de Provas</h3>
-              <p className="text-green-100 mb-4">
-                Crie e gerencie suas provas
-              </p>
+              <p className="text-green-100 mb-4">Crie e gerencie suas provas</p>
               <Link to="/exams">
-                <Button variant="outline" className="bg-white text-green-600 border-white hover:bg-green-50">
+                <Button
+                  variant="outline"
+                  className="bg-white text-green-600 border-white hover:bg-green-50"
+                >
                   <ClipboardList className="h-4 w-4 mr-2" />
                   Acessar
                 </Button>
@@ -132,8 +141,12 @@ const Dashboard: React.FC = () => {
               <FileText className="h-6 w-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total de Questões</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalQuestions}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Total de Questões
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.totalQuestions}
+              </p>
             </div>
           </div>
         </div>
@@ -144,8 +157,12 @@ const Dashboard: React.FC = () => {
               <ClipboardList className="h-6 w-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total de Provas</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalExams}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Total de Provas
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.totalExams}
+              </p>
             </div>
           </div>
         </div>
@@ -172,7 +189,9 @@ const Dashboard: React.FC = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Média Q/Prova</p>
               <p className="text-2xl font-bold text-gray-900">
-                {stats.totalExams > 0 ? Math.round(stats.totalQuestions / stats.totalExams) : 0}
+                {stats.totalExams > 0
+                  ? Math.round(stats.totalQuestions / stats.totalExams)
+                  : 0}
               </p>
             </div>
           </div>
@@ -181,7 +200,9 @@ const Dashboard: React.FC = () => {
 
       {/* Quick Create Actions */}
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Ações Rápidas
+        </h3>
         <div className="flex flex-wrap gap-4">
           <Link to="/questions/new">
             <Button icon={Plus} variant="primary">
@@ -204,14 +225,17 @@ const Dashboard: React.FC = () => {
           </h3>
           <div className="space-y-3">
             {topDisciplines.map(([discipline, count]) => (
-              <div key={discipline} className="flex items-center justify-between">
+              <div
+                key={discipline}
+                className="flex items-center justify-between"
+              >
                 <span className="text-gray-700 font-medium">{discipline}</span>
                 <div className="flex items-center">
                   <div className="w-24 bg-gray-200 rounded-full h-2 mr-3">
-                    <div 
+                    <div
                       className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ 
-                        width: `${(count / stats.totalQuestions) * 100}%` 
+                      style={{
+                        width: `${(count / stats.totalQuestions) * 100}%`,
                       }}
                     />
                   </div>

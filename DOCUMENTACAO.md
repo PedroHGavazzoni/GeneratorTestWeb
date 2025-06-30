@@ -219,7 +219,7 @@ export const api = {
 4. **Rode o frontend:**
 
    ```
-   npm start
+   npm start ou npm run dev
    ```
 
 5. **Acesse:**  

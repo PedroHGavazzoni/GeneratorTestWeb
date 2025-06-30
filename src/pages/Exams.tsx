@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, BookOpen, FileText } from 'lucide-react';
-import { api } from '../services/api';
-import { Exam } from '../types';
-import Button from '../components/Button';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Modal from '../components/Modal';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Plus, Edit, Trash2, Eye, BookOpen, FileText } from "lucide-react";
+import { api } from "../services/api";
+import { Exam } from "../types";
+import Button from "../components/Button";
+import LoadingSpinner from "../components/LoadingSpinner";
+import Modal from "../components/Modal";
 
 const Exams: React.FC = () => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
@@ -23,24 +23,27 @@ const Exams: React.FC = () => {
       setLoading(true);
       const data = await api.getExams();
       setExams(data);
-    } catch (err) {
-      setError('Erro ao carregar provas. Verifique se o servidor está funcionando.');
-      console.error('Exams loading error:', err);
+    } catch {
+      setError(
+        "Erro ao carregar provas. Verifique se o servidor está funcionando."
+      );
+      // Optionally, you can log a generic error if needed
+      // console.error("Exams loading error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta prova?')) {
+    if (!window.confirm("Tem certeza que deseja excluir esta prova?")) {
       return;
     }
 
     try {
       await api.deleteExam(id);
-      setExams(prev => prev.filter(e => e.IdProva !== id));
-    } catch (err) {
-      alert('Erro ao excluir prova');
+      setExams((prev) => prev.filter((e) => e.IdProva !== id));
+    } catch {
+      alert("Erro ao excluir prova");
     }
   };
 
@@ -50,7 +53,7 @@ const Exams: React.FC = () => {
       setSelectedExam(fullExam);
       setShowPreviewModal(true);
     } catch (err) {
-      alert('Erro ao carregar detalhes da prova');
+      alert("Erro ao carregar detalhes da prova");
     }
   };
 
@@ -90,9 +93,7 @@ const Exams: React.FC = () => {
           <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <p className="text-gray-500 text-lg mb-4">Nenhuma prova cadastrada</p>
           <Link to="/exams/new">
-            <Button icon={Plus}>
-              Criar primeira prova
-            </Button>
+            <Button icon={Plus}>Criar primeira prova</Button>
           </Link>
         </div>
       ) : (
@@ -116,7 +117,8 @@ const Exams: React.FC = () => {
 
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">{exam.QuantidadeQuestoes}</span> questões
+                  <span className="font-medium">{exam.QuantidadeQuestoes}</span>{" "}
+                  questões
                 </p>
               </div>
 
@@ -131,7 +133,12 @@ const Exams: React.FC = () => {
                   Visualizar
                 </Button>
                 <Link to={`/exams/${exam.IdProva}`} className="flex-1">
-                  <Button size="sm" variant="primary" icon={Edit} className="w-full">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    icon={Edit}
+                    className="w-full"
+                  >
                     Editar
                   </Button>
                 </Link>
@@ -140,7 +147,9 @@ const Exams: React.FC = () => {
                   variant="danger"
                   onClick={() => handleDelete(exam.IdProva)}
                   icon={Trash2}
-                />
+                >
+                  Excluir
+                </Button>
               </div>
             </div>
           ))}
@@ -161,10 +170,14 @@ const Exams: React.FC = () => {
                 {selectedExam.Titulo}
               </h3>
               <p className="text-gray-600">
-                Disciplina: <span className="font-medium">{selectedExam.Disciplina}</span>
+                Disciplina:{" "}
+                <span className="font-medium">{selectedExam.Disciplina}</span>
               </p>
               <p className="text-gray-600">
-                Total de questões: <span className="font-medium">{selectedExam.QuantidadeQuestoes}</span>
+                Total de questões:{" "}
+                <span className="font-medium">
+                  {selectedExam.QuantidadeQuestoes}
+                </span>
               </p>
             </div>
 
@@ -172,7 +185,10 @@ const Exams: React.FC = () => {
               <h4 className="font-medium text-gray-900 mb-3">Questões:</h4>
               <div className="space-y-3">
                 {selectedExam.Questoes?.map((question, index) => (
-                  <div key={question.IdQuestao} className="bg-gray-50 p-3 rounded-lg">
+                  <div
+                    key={question.IdQuestao}
+                    className="bg-gray-50 p-3 rounded-lg"
+                  >
                     <div className="flex items-start gap-2">
                       <span className="text-sm font-medium text-gray-500 mt-1">
                         {index + 1}.
@@ -203,7 +219,8 @@ const Exams: React.FC = () => {
 
       {/* Stats */}
       <div className="text-center text-sm text-gray-500">
-        Total de {exams.length} prova{exams.length !== 1 ? 's' : ''} cadastrada{exams.length !== 1 ? 's' : ''}
+        Total de {exams.length} prova{exams.length !== 1 ? "s" : ""} cadastrada
+        {exams.length !== 1 ? "s" : ""}
       </div>
     </div>
   );
