@@ -1,70 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Trash2, Plus, X } from "lucide-react";
 import { api } from "../services/api";
-import { Alternative } from "../types";
+import { Alternative, Question } from "../types";
 import Button from "../components/Button";
 import LoadingSpinner from "../components/LoadingSpinner";
+
+const DEFAULT_ALTERNATIVES: Alternative[] = [
+  { id: "1", description: "", isCorrect: false },
+  { id: "2", description: "", isCorrect: false },
+  { id: "3", description: "", isCorrect: false },
+  { id: "4", description: "", isCorrect: false },
+  { id: "5", description: "", isCorrect: false },
+];
 
 const QuestionForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
 
+  const [formData, setFormData] = useState<Question | null>(null);
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
-  const [formData, setFormData] = useState({
-    Titulo: "",
-    Disciplina: "",
-    Assuntos: [] as string[],
-    alternatives: [
-      { id: "1", description: "", isCorrect: false },
-      { id: "2", description: "", isCorrect: false },
-      { id: "3", description: "", isCorrect: false },
-      { id: "4", description: "", isCorrect: false },
-      { id: "5", description: "", isCorrect: false },
-    ] as Alternative[],
-  });
-
   const [newSubject, setNewSubject] = useState("");
 
   useEffect(() => {
-    if (isEditing && id) {
-      loadQuestion(parseInt(id));
+    if (isEditing) {
+      setLoading(true);
+      api
+        .getQuestion(Number(id))
+        .then((data) => {
+          // Garante que sempre haverá 5 alternativas
+          let alternatives = data.alternatives || [];
+          if (alternatives.length < 5) {
+            alternatives = [
+              ...alternatives,
+              ...DEFAULT_ALTERNATIVES.slice(alternatives.length),
+            ];
+          }
+          setFormData({
+            ...data,
+            alternatives,
+          });
+        })
+        .catch(() => setError("Erro ao carregar questão"))
+        .finally(() => setLoading(false));
+    } else {
+      setFormData({
+        IdQuestao: 0,
+        Titulo: "",
+        Disciplina: "",
+        Assuntos: [],
+        alternatives: [...DEFAULT_ALTERNATIVES],
+      });
     }
   }, [id, isEditing]);
 
-  const loadQuestion = async (questionId: number) => {
-    try {
-      setLoading(true);
-      const question = await api.getQuestion(questionId);
-      setFormData({
-        Titulo: question.Titulo,
-        Disciplina: question.Disciplina,
-        Assuntos: question.Assuntos,
-        alternatives: [
-          { id: "1", description: "", isCorrect: false },
-          { id: "2", description: "", isCorrect: false },
-          { id: "3", description: "", isCorrect: false },
-          { id: "4", description: "", isCorrect: false },
-          { id: "5", description: "", isCorrect: false },
-        ],
-      });
-    } catch (err) {
-      setError("Erro ao carregar questão");
-      console.error("Question loading error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    if (!formData) return;
+    setFormData({ ...formData, [field]: value });
   };
 
   const handleAlternativeChange = (
@@ -72,18 +67,20 @@ const QuestionForm: React.FC = () => {
     field: keyof Alternative,
     value: string | boolean
   ) => {
+    if (!formData) return;
     setFormData((prev) => ({
-      ...prev,
-      alternatives: prev.alternatives.map((alt, i) =>
+      ...prev!,
+      alternatives: (prev!.alternatives ?? []).map((alt, i) =>
         i === index ? { ...alt, [field]: value } : alt
       ),
     }));
   };
 
   const handleCorrectAlternativeChange = (index: number) => {
+    if (!formData) return;
     setFormData((prev) => ({
-      ...prev,
-      alternatives: prev.alternatives.map((alt, i) => ({
+      ...prev!,
+      alternatives: (prev!.alternatives ?? []).map((alt, i) => ({
         ...alt,
         isCorrect: i === index,
       })),
@@ -91,23 +88,29 @@ const QuestionForm: React.FC = () => {
   };
 
   const addSubject = () => {
-    if (newSubject.trim() && !formData.Assuntos.includes(newSubject.trim())) {
+    if (
+      newSubject.trim() &&
+      formData &&
+      !formData.Assuntos.includes(newSubject.trim())
+    ) {
       setFormData((prev) => ({
-        ...prev,
-        Assuntos: [...prev.Assuntos, newSubject.trim()],
+        ...prev!,
+        Assuntos: [...prev!.Assuntos, newSubject.trim()],
       }));
       setNewSubject("");
     }
   };
 
   const removeSubject = (subjectToRemove: string) => {
+    if (!formData) return;
     setFormData((prev) => ({
-      ...prev,
-      Assuntos: prev.Assuntos.filter((subject) => subject !== subjectToRemove),
+      ...prev!,
+      Assuntos: prev!.Assuntos.filter((subject) => subject !== subjectToRemove),
     }));
   };
 
   const validateForm = () => {
+    if (!formData) return false;
     if (!formData.Titulo.trim()) {
       setError("Título é obrigatório");
       return false;
@@ -120,11 +123,11 @@ const QuestionForm: React.FC = () => {
       setError("Pelo menos um assunto é obrigatório");
       return false;
     }
-    if (formData.alternatives.some((alt) => !alt.description.trim())) {
+    if ((formData.alternatives ?? []).some((alt) => !alt.description.trim())) {
       setError("Todas as alternativas devem ser preenchidas");
       return false;
     }
-    if (!formData.alternatives.some((alt) => alt.isCorrect)) {
+    if (!(formData.alternatives ?? []).some((alt) => alt.isCorrect)) {
       setError("Uma alternativa deve ser marcada como correta");
       return false;
     }
@@ -135,20 +138,16 @@ const QuestionForm: React.FC = () => {
     e.preventDefault();
     setError("");
 
-    if (!validateForm()) {
+    if (!validateForm() || !formData) {
       return;
     }
 
     try {
       setSaving(true);
-      if (isEditing && id) {
-        await api.updateQuestion(parseInt(id), formData);
+      if (isEditing) {
+        await api.updateQuestion(Number(id), formData);
       } else {
-        await api.createQuestion({
-          Titulo: formData.Titulo,
-          Disciplina: formData.Disciplina,
-          Assuntos: formData.Assuntos,
-        });
+        await api.createQuestion(formData);
       }
       navigate("/questions");
     } catch (err) {
@@ -167,7 +166,7 @@ const QuestionForm: React.FC = () => {
     }
 
     try {
-      await api.deleteQuestion(parseInt(id));
+      await api.deleteQuestion(Number(id));
       navigate("/questions");
     } catch {
       setError("Erro ao excluir questão");
@@ -181,6 +180,18 @@ const QuestionForm: React.FC = () => {
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto py-12">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!formData) return null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -205,13 +216,6 @@ const QuestionForm: React.FC = () => {
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
-      )}
-
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -225,6 +229,7 @@ const QuestionForm: React.FC = () => {
                 Título da Questão *
               </label>
               <textarea
+                name="Titulo"
                 value={formData.Titulo}
                 onChange={(e) => handleInputChange("Titulo", e.target.value)}
                 rows={3}
@@ -240,6 +245,7 @@ const QuestionForm: React.FC = () => {
               </label>
               <input
                 type="text"
+                name="Disciplina"
                 value={formData.Disciplina}
                 onChange={(e) =>
                   handleInputChange("Disciplina", e.target.value)
@@ -304,7 +310,7 @@ const QuestionForm: React.FC = () => {
           </p>
 
           <div className="space-y-4">
-            {formData.alternatives.map((alternative, index) => (
+            {(formData.alternatives ?? []).map((alternative, index) => (
               <div
                 key={alternative.id}
                 className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg"

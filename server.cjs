@@ -18,7 +18,9 @@ const config = {
 sql
   .connect(config)
   .then(() =>
-    app.listen(5000, () => console.log("API rodando em http://localhost:5000"))
+    app.listen(5000, "localhost", () =>
+      console.log("API rodando em http://localhost:5000")
+    )
   )
   .catch((err) => console.error("Erro ao conectar ao SQL Server:", err));
 

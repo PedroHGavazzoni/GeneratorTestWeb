@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Search, Edit, Trash2, Filter } from 'lucide-react';
-import { api } from '../services/api';
-import { Question } from '../types';
-import Button from '../components/Button';
-import LoadingSpinner from '../components/LoadingSpinner';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Plus, Search, Edit, Trash2, Filter } from "lucide-react";
+import { api } from "../services/api";
+import { Question } from "../types";
+import Button from "../components/Button";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Questions: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDiscipline, setSelectedDiscipline] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('');
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDiscipline, setSelectedDiscipline] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
 
   useEffect(() => {
     loadQuestions();
@@ -28,9 +28,12 @@ const Questions: React.FC = () => {
       setLoading(true);
       const data = await api.getQuestions();
       setQuestions(data);
-    } catch (err) {
-      setError('Erro ao carregar questões. Verifique se o servidor está funcionando.');
-      console.error('Questions loading error:', err);
+    } catch {
+      setError(
+        "Erro ao carregar questões. Verifique se o servidor está funcionando."
+      );
+      // Optionally, you can keep the console.error line if you want to log the error:
+      // console.error("Questions loading error");
     } finally {
       setLoading(false);
     }
@@ -40,39 +43,42 @@ const Questions: React.FC = () => {
     let filtered = questions;
 
     if (searchTerm) {
-      filtered = filtered.filter(q => 
-        q.Titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.Disciplina.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.Assuntos.some(a => a.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (q) =>
+          q.Titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          q.Disciplina.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          q.Assuntos.some((a) =>
+            a.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       );
     }
 
     if (selectedDiscipline) {
-      filtered = filtered.filter(q => q.Disciplina === selectedDiscipline);
+      filtered = filtered.filter((q) => q.Disciplina === selectedDiscipline);
     }
 
     if (selectedSubject) {
-      filtered = filtered.filter(q => q.Assuntos.includes(selectedSubject));
+      filtered = filtered.filter((q) => q.Assuntos.includes(selectedSubject));
     }
 
     setFilteredQuestions(filtered);
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta questão?')) {
+    if (!window.confirm("Tem certeza que deseja excluir esta questão?")) {
       return;
     }
 
     try {
       await api.deleteQuestion(id);
-      setQuestions(prev => prev.filter(q => q.IdQuestao !== id));
-    } catch (err) {
-      alert('Erro ao excluir questão');
+      setQuestions((prev) => prev.filter((q) => q.IdQuestao !== id));
+    } catch {
+      alert("Erro ao excluir questão");
     }
   };
 
-  const disciplines = [...new Set(questions.map(q => q.Disciplina))];
-  const subjects = [...new Set(questions.flatMap(q => q.Assuntos))];
+  const disciplines = [...new Set(questions.map((q) => q.Disciplina))];
+  const subjects = [...new Set(questions.flatMap((q) => q.Assuntos))];
 
   if (loading) {
     return (
@@ -87,7 +93,9 @@ const Questions: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Banco de Questões</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Banco de Questões
+          </h1>
           <p className="text-gray-600">Gerencie suas questões cadastradas</p>
         </div>
         <Link to="/questions/new">
@@ -126,7 +134,7 @@ const Questions: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Todas</option>
-              {disciplines.map(discipline => (
+              {disciplines.map((discipline) => (
                 <option key={discipline} value={discipline}>
                   {discipline}
                 </option>
@@ -144,7 +152,7 @@ const Questions: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Todos</option>
-              {subjects.map(subject => (
+              {subjects.map((subject) => (
                 <option key={subject} value={subject}>
                   {subject}
                 </option>
@@ -156,9 +164,9 @@ const Questions: React.FC = () => {
             <Button
               variant="outline"
               onClick={() => {
-                setSearchTerm('');
-                setSelectedDiscipline('');
-                setSelectedSubject('');
+                setSearchTerm("");
+                setSelectedDiscipline("");
+                setSelectedSubject("");
               }}
               className="w-full"
             >
@@ -181,13 +189,13 @@ const Questions: React.FC = () => {
         {filteredQuestions.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
-              {questions.length === 0 ? 'Nenhuma questão cadastrada' : 'Nenhuma questão encontrada com os filtros aplicados'}
+              {questions.length === 0
+                ? "Nenhuma questão cadastrada"
+                : "Nenhuma questão encontrada com os filtros aplicados"}
             </p>
             {questions.length === 0 && (
               <Link to="/questions/new" className="mt-4 inline-block">
-                <Button icon={Plus}>
-                  Criar primeira questão
-                </Button>
+                <Button icon={Plus}>Criar primeira questão</Button>
               </Link>
             )}
           </div>
@@ -212,7 +220,10 @@ const Questions: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredQuestions.map((question) => (
-                  <tr key={question.IdQuestao} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={question.IdQuestao}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
                         {question.Titulo}
@@ -241,6 +252,7 @@ const Questions: React.FC = () => {
                         className="text-blue-600 hover:text-blue-900 transition-colors"
                       >
                         <Edit className="h-4 w-4 inline" />
+                        Editar
                       </Link>
                       <button
                         onClick={() => handleDelete(question.IdQuestao)}

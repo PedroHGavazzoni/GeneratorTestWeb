@@ -1,5 +1,6 @@
 import { Question, Exam } from "../types";
 
+// Apenas acesso local
 const API_URL = "http://localhost:5000/api";
 
 export const api = {
